@@ -1,7 +1,8 @@
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.5.21"
+    kotlin("jvm") version "1.6.10"
+    id("org.jetbrains.compose") version "1.1.1"
     id("maven-publish")
 }
 
@@ -10,8 +11,11 @@ version = "0.7.0"
 
 repositories {
     mavenCentral()
+    google()
+    maven("https://jitpack.io")
     maven("https://maven.google.com")
     maven("https://jetbrains.bintray.com/trove4j")
+    maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
 }
 
 dependencies {
@@ -22,13 +26,18 @@ dependencies {
     implementation("org.ogce:xpp3:1.1.6")
 
     testImplementation(kotlin("test-junit"))
+    implementation(compose.ui)
+    testImplementation("org.jetbrains.compose.runtime:runtime:1.1.1")
+    implementation(compose.foundation)
+    implementation(compose.desktop.currentOs)
+
 }
 
 tasks.test {
     useJUnit()
 }
 
-tasks.withType<KotlinCompile>() {
+tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "1.8"
 }
 

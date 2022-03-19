@@ -1,28 +1,23 @@
 package br.com.devsrsouza.svg2compose
 
-import java.io.File
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.size
+import androidx.compose.material.Icon
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.application
+import androidx.compose.ui.window.rememberWindowState
+import br.com.compose.icons.EvaIcons
+import br.com.compose.icons.evaicons.Branch
+import br.com.compose.icons.evaicons.IcBalanceScale
 
-fun main() {
-    val iconTest = File("raw-icons4")
-    val src = File("build/generated-icons").apply { mkdirs() }
-
-    Svg2Compose.parse(
-        applicationIconPackage = "br.com.compose.icons",
-        accessorName = "EvaIcons",
-        outputSourceDirectory = src,
-        vectorsDirectory = iconTest,
-        iconNameTransformer = { name, group ->
-            name.removeSuffix(group, ignoreCase = true)
+fun main() = application {
+    Window(::exitApplication, title = "Eva Icons SVG 2 Compose", state = rememberWindowState(width = 400.dp, height = 400.dp)) {
+        Row {
+            Icon(EvaIcons.Branch, "Brand Icon Test", modifier = Modifier.size(32.dp))
+            Icon(EvaIcons.IcBalanceScale, "Balance Scale Icon Test", Modifier.size(32.dp))
         }
-    )
-}
-
-private fun String.removeSuffix(suffix: String, ignoreCase: Boolean): String {
-    return if (ignoreCase) {
-        val index = lastIndexOf(suffix, ignoreCase = true)
-
-        if (index > -1) substring(0, index) else this
-    } else {
-        removeSuffix(suffix)
     }
 }

@@ -30,7 +30,6 @@ object Svg2Compose {
         iconNameTransformer: IconNameTransformer = { it, _ -> it },
         allAssetsPropertyName: String = "AllAssets"
     ): ParsingResult {
-        fun nameRelative(vectorFile: File) = vectorFile.relativeTo(vectorsDirectory).path
 
         val drawableDir = drawableTempDirectory()
 
@@ -40,6 +39,7 @@ object Svg2Compose {
             .maxDepth(10)
             .onEnter { file ->
                 val dirIcons = (file.listFiles() ?: arrayOf())
+                    .filterNotNull()
                     .filter { it.isDirectory.not() }
                     .filter { it.extension.equals(type.extension, ignoreCase = true) }
 
@@ -59,19 +59,9 @@ object Svg2Compose {
 
                 val generatedIconsMemberNames: Map<VectorFile, MemberName> =
                     if (dirIcons.isNotEmpty()) {
-                        val drawables: List<Pair<File, File>> = when (type) {
-                            VectorType.SVG -> dirIcons.map {
-                                val iconName = nameRelative(it).withoutExtension
 
-                                val parsedFile = File(drawableDir, "${iconName}.xml")
-                                parsedFile.parentFile.mkdirs()
 
-                                Svg2Vector.parseSvgToXml(it, parsedFile.outputStream())
-
-                                it to parsedFile
-                            }.toList()
-                            VectorType.DRAWABLE -> dirIcons.toList().map { it to it }
-                        }
+                        val drawables: List<Pair<File, File>> = getDrawables(type, dirIcons, drawableDir, vectorsDirectory)
 
                         val icons: Map<VectorFile, Icon> = drawables.associate { (vectorFile, drawableFile) ->
                             vectorFile to Icon(
@@ -144,7 +134,29 @@ object Svg2Compose {
     private fun drawableTempDirectory() = createTempDirectory(prefix = "svg2compose").toFile()
 
     private val String.withoutExtension get() = substringBeforeLast(".")
+
+    private fun File.nameRelative(vectorsDirectory: File) = relativeTo(vectorsDirectory).path
+
+    private fun getDrawables(type: VectorType, icons: List<File>, drawableDir: File, vectorsDirectory: File): List<Pair<File, File>> =
+        when (type) {
+            VectorType.SVG -> icons.map {
+                val iconName = it.nameRelative(vectorsDirectory).withoutExtension
+
+                val parsedFile = File(drawableDir, "${iconName}.xml")
+                parsedFile.parentFile.mkdirs()
+
+                Svg2Vector.parseSvgToXml(it, parsedFile.outputStream())
+
+                it to parsedFile
+            }.toList()
+            VectorType.DRAWABLE -> icons.toList().map { it to it }
+        }
+
+
 }
+
+
+
 
 typealias GroupFolder = File
 typealias VectorFile = File

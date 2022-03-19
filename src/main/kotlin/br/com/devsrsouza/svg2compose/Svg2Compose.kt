@@ -83,7 +83,7 @@ object Svg2Compose {
                             )
                         }
 
-                        val writer = IconWriter(
+                        val writer = IconsWriter(
                             icons.values,
                             groupClassName,
                             iconsPackage,

@@ -10,6 +10,13 @@ class IconWriter(
     private val groupPackage: String,
 ) {
 
+
+    /**
+     * Generates icon and writer it to [outputSrcDirectory]
+     *
+     * @param outputSrcDirectory the directory to generate source files in
+     * @return MemberName of the created icons
+     */
     fun generateTo(outputSrcDirectory: File): MemberName {
         val iconName = icon.kotlinName
 

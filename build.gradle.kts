@@ -19,7 +19,7 @@ repositories {
 }
 
 dependencies {
-    implementation("com.google.guava:guava:23.0")
+    implementation("com.google.guava:guava:31.1-jre")
     implementation("com.android.tools:sdk-common:27.2.0-alpha16")
     implementation("com.android.tools:common:27.2.0-alpha16")
     implementation("com.squareup:kotlinpoet:1.9.0")

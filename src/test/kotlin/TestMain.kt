@@ -8,22 +8,34 @@ class TestMain {
 
     @Test
     fun traverseGeneratorTest() {
-        val icons = File("src/test/resources/icons")
-        val src = File("src/test/kotlin").apply { mkdirs() }
+        val iconsDir = File("src/test/resources/icons")
+        val destinationDir = File("src/test/kotlin").apply { mkdirs() }
 
-        assert(icons.exists()) {
+        assert(iconsDir.exists()) {
             "Make sure to add icons into res dir. Default test icons have been provided"
+        }
+
+        assert(destinationDir.exists()) {
+            "Icons destination dir wasn't created ${destinationDir.path}"
         }
 
         Svg2Compose.parse(
             applicationIconPackage = "br.com.compose.icons",
             accessorName = "EvaIcons",
-            outputSourceDirectory = src,
-            vectorsDirectory = icons,
+            outputSourceDirectory = destinationDir,
+            vectorsDirectory = iconsDir,
             iconNameTransformer = { name, group ->
                 name.removeSuffix(group, ignoreCase = true)
             }
         )
+
+        val generatedIconsDir = File(destinationDir, "br/com/compose/icons")
+
+        assert(generatedIconsDir.exists()) {
+            "Icons weren't generated"
+        }
+
+
 
     }
 

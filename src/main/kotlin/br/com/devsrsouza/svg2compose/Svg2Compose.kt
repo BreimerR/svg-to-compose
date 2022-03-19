@@ -38,7 +38,7 @@ object Svg2Compose {
         vectorsDirectory.walkTopDown()
             .maxDepth(10)
             .onEnter { file ->
-                val dirIcons = file.listFiles()
+                val dirIcons = (file.listFiles() ?: arrayOf())
                     .filter { it.isDirectory.not() }
                     .filter { it.extension.equals(type.extension, ignoreCase = true) }
 

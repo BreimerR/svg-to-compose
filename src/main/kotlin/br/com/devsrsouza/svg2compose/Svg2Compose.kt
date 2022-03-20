@@ -22,7 +22,7 @@ data class Size(val height: Float, val width: Float) {
 
 object Svg2Compose {
 
-    val svgComposeTempDir by lazy {
+    private val svgComposeTempDir: File by lazy {
         drawableTempDirectory()
     }
 
@@ -167,8 +167,7 @@ object Svg2Compose {
         groupName: String = "EvaIcons",
         iconNameTransformer: IconNameTransformer = { it, _ -> it },
         size: Size? = null,
-        consumer: (MemberName, File) -> Unit
-    ) {
+    ): MemberName {
         val iconFile = File(path)
 
         val iconFileName = iconFile.nameWithoutExtension
@@ -201,8 +200,7 @@ object Svg2Compose {
             groupName
         ).createFileSpec(null)
 
-
-        icon.writer(
+        return icon.writer(
             groupClassName,
             packageName,
             size

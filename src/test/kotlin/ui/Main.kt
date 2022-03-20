@@ -19,7 +19,7 @@ fun main() = application {
 
         CompositionLocalProvider(LocalContentColor provides MaterialTheme.colors.primary) {
             Column {
-                Row {
+                /*Row {
                     Icon(EvaIcons.Branch12, "Icon of size 12")
                     Icon(EvaIcons.IcBalanceScale12, "Icon of size 12")
                 }
@@ -52,6 +52,7 @@ fun main() = application {
                     Icon(EvaIcons.Branch128, "Icon of size 12")
                     Icon(EvaIcons.IcBalanceScale128, "Icon of size 12")
                 }
+               */
                 Row {
                     Icon(EvaIcons.Branch640, "Icon of size 12")
                     Icon(EvaIcons.IcBalanceScale640, "Icon of size 12")

@@ -74,6 +74,13 @@ class TestMain {
     }
 
     @Test
+    fun singleFileParser() {
+        Svg2Compose.parse("src/test/resources/icons/branch.svg", File("src/test/kotlin")) { memberName, file ->
+
+        }
+    }
+
+    @Test
     fun testCamelCase() {
         val iconName = "IconName"
 

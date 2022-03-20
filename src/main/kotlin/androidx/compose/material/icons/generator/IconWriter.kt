@@ -28,64 +28,75 @@ typealias IconGroup = String
  *
  * @property icons the list of [Icon]s to generate Kotlin files for
  */
-class IconWriter(
-    private val icons: Collection<Icon>,
-    private val groupClass: ClassName,
-    private val groupPackage: String,
-    private val defaultSize: Size?,
-) {
-    /**
-     * Generates icons and writes them to [outputSrcDirectory], using [iconNamePredicate] to
-     * filter what icons to generate for.
-     *
-     * @param outputSrcDirectory the directory to generate source files in
-     * @param iconNamePredicate the predicate that filters what icons should be generated. If
-     * false, the icon will not be parsed and generated in [outputSrcDirectory].
-     *
-     * @return MemberName of the created icons
-     */
-    fun generateTo(
-        outputSrcDirectory: File,
-        iconNamePredicate: (String) -> Boolean
-    ): List<MemberName> {
+data class Writer<T>(
+    internal val type: T,
+    internal val groupClass: ClassName,
+    internal val groupPackage: String,
+    internal val defaultSize: Size?
+)
 
-        return icons.filter { icon ->
-            val iconName = icon.kotlinName
+/**
+ * Generates icons and writes them to [outputSrcDirectory], using [iconNamePredicate] to
+ * filter what icons to generate for.
+ *
+ * @param outputSrcDirectory the directory to generate source files in
+ * @param iconNamePredicate the predicate that filters what icons should be generated. If
+ * false, the icon will not be parsed and generated in [outputSrcDirectory].
+ *
+ * @return MemberName of the created icons
+ */
+fun Collection<Icon>.writer(groupClass: ClassName, groupPackage: String, defaultSize: Size?) =
+    Writer(this, groupClass, groupPackage, defaultSize)
 
-            iconNamePredicate(iconName)
-        }.map { icon ->
-            val iconName = icon.kotlinName
+fun Writer<Collection<Icon>>.write(outputSrcDirectory: File, iconNamePredicate: (String) -> Boolean) = type.filter {
+    iconNamePredicate(it.kotlinName)
+}.map { icon ->
 
-            /**check [androidx.compose.material.icons.generator.vector.Vector]**/
-            val vector = IconParser(icon).parse(defaultSize).let { parsedVector ->
-                defaultSize?.let {
-                    parsedVector.copy(
-                        width = when (parsedVector.width) {
-                            is Pixel -> Pixel(defaultSize.width)
-                            is Dp -> Dp(defaultSize.width)
-                        },
-                        height = when (parsedVector.height) {
-                            is Pixel -> Pixel(defaultSize.height)
-                            is Dp -> Dp(defaultSize.height)
-                        }
-                    )
-                } ?: parsedVector
-            }
-
-            val (fileSpec, accessProperty) = VectorAssetGenerator(
-                 defaultSize?.let {
-                     "$iconName${it.maxValue}"
-                 } ?: iconName,
-                groupPackage,
-                vector
-            ).createFileSpec(groupClass)
-
-            fileSpec.writeTo(outputSrcDirectory)
-
-            MemberName(fileSpec.packageName, accessProperty)
-
-        }
-
-    }
+    icon.writer(
+        groupClass,
+        groupPackage,
+        defaultSize
+    ).write(outputSrcDirectory)
 
 }
+
+fun Writer<Icon>.write(outputSrcDirectory: File): MemberName {
+
+    val name = type.kotlinName
+
+    /**check [androidx.compose.material.icons.generator.vector.Vector]**/
+    val vector = IconParser(type).parse(defaultSize).let { parsedVector ->
+        defaultSize?.let {
+            parsedVector.copy(
+                width = when (parsedVector.width) {
+                    is Pixel -> Pixel(defaultSize.width)
+                    is Dp -> Dp(defaultSize.width)
+                },
+                height = when (parsedVector.height) {
+                    is Pixel -> Pixel(defaultSize.height)
+                    is Dp -> Dp(defaultSize.height)
+                }
+            )
+        } ?: parsedVector
+    }
+
+    val (fileSpec, accessProperty) = VectorAssetGenerator(
+        defaultSize?.let {
+            "$name${it.maxValue}"
+        } ?: name,
+        groupPackage,
+        vector
+    ).createFileSpec(groupClass)
+
+    fileSpec.writeTo(outputSrcDirectory)
+
+    return MemberName(fileSpec.packageName, accessProperty)
+
+}
+
+fun Icon.writer(groupClass: ClassName, groupPackage: String, defaultSize: Size?) = Writer(
+    this,
+    groupClass,
+    groupPackage,
+    defaultSize
+)

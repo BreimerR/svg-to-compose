@@ -22,6 +22,10 @@ data class Size(val height: Float, val width: Float) {
 
 object Svg2Compose {
 
+    val svgComposeTempDir by lazy {
+        drawableTempDirectory()
+    }
+
     /**
      * Generates source code for the [vectors] files.
      *
@@ -40,9 +44,6 @@ object Svg2Compose {
         allAssetsPropertyName: String = "AllAssets",
         size: Size? = null,
     ): ParsingResult {
-        fun nameRelative(vectorFile: File) = vectorFile.relativeTo(vectorsDirectory).path
-
-        val drawableDir = drawableTempDirectory()
 
         val groupStack = Stack<GeneratedGroup>()
 
@@ -72,9 +73,9 @@ object Svg2Compose {
                     if (dirIcons.isNotEmpty()) {
                         val drawables: List<Pair<File, File>> = when (type) {
                             VectorType.SVG -> dirIcons.map {
-                                val iconName = nameRelative(it).withoutExtension
+                                val iconName = it.nameRelative(vectorsDirectory).withoutExtension
 
-                                val parsedFile = File(drawableDir, "${iconName}.xml")
+                                val parsedFile = File(svgComposeTempDir, "${iconName}.xml")
                                 parsedFile.parentFile.mkdirs()
 
                                 Svg2Vector.parseSvgToXml(it, parsedFile.outputStream())
@@ -95,14 +96,11 @@ object Svg2Compose {
                             )
                         }
 
-                        val writer = IconWriter(
-                            icons.values,
+                        val memberNames = icons.values.writer(
                             groupClassName,
                             iconsPackage,
                             size
-                        )
-
-                        val memberNames = writer.generateTo(outputSourceDirectory) { true }
+                        ).write(outputSourceDirectory) { true }
 
                         icons.mapValues { entry ->
                             memberNames.first {
@@ -160,8 +158,63 @@ object Svg2Compose {
     private fun drawableTempDirectory() = createTempDirectory(prefix = "svg2compose").toFile()
 
     private val String.withoutExtension get() = substringBeforeLast(".")
+
+    fun parse(
+        path: IconPath,
+        outputSourceDirectory: File,
+        type: VectorType = VectorType.SVG,
+        packageName: String = "com.exampe",
+        groupName: String = "EvaIcons",
+        iconNameTransformer: IconNameTransformer = { it, _ -> it },
+        size: Size? = null,
+        consumer: (MemberName, File) -> Unit
+    ) {
+        val iconFile = File(path)
+
+        val iconFileName = iconFile.nameWithoutExtension
+
+        val drawableFile = when (type) {
+            VectorType.SVG -> {
+                val parsedFile = File(svgComposeTempDir, "drawables/${iconFileName}.xml")
+                parsedFile.parentFile.mkdirs()
+
+                Svg2Vector.parseSvgToXml(iconFile, parsedFile.outputStream())
+
+                parsedFile
+            }
+            VectorType.DRAWABLE -> {
+                iconFile
+            }
+        }
+
+        val icon = Icon(
+            iconNameTransformer(
+                drawableFile.nameWithoutExtension.toKotlinPropertyName().trim(),
+                groupName
+            ),
+            drawableFile.name,
+            drawableFile.readText()
+        )
+
+        val (_, groupClassName) = IconGroupGenerator(
+            packageName,
+            groupName
+        ).createFileSpec(null)
+
+
+        icon.writer(
+            groupClassName,
+            packageName,
+            size
+        ).write(outputSourceDirectory)
+
+    }
+
+    private fun File.nameRelative(vectorsDirectory: File) = relativeTo(vectorsDirectory).path
+
 }
 
+typealias IconPath = String
 typealias GroupFolder = File
 typealias VectorFile = File
 

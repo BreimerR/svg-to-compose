@@ -1,5 +1,6 @@
 package br.com.devsrsouza.svg2compose
 
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.application
 import org.junit.Test
 import java.io.File
@@ -75,9 +76,7 @@ class TestMain {
 
     @Test
     fun singleFileParser() {
-        Svg2Compose.parse("src/test/resources/icons/branch.svg", File("src/test/kotlin")) { memberName, file ->
-
-        }
+        Svg2Compose.parse("src/test/resources/icons/branch.svg", File("src/test/kotlin"), VectorType.SVG, size = Size(21))
     }
 
     @Test

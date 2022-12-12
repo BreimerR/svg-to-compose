@@ -7,10 +7,9 @@ plugins {
 }
 
 group = "br.com.devsrsouza"
-version = "0.7.0"
+version = "0.8.2"
 
 repositories {
-    mavenCentral()
     google()
     mavenCentral()
     maven("https://jitpack.io")
@@ -25,7 +24,7 @@ dependencies {
     implementation("com.google.guava:guava:31.1-jre")
     implementation("com.android.tools:sdk-common:27.2.0-alpha16")
     implementation("com.android.tools:common:27.2.0-alpha16")
-    implementation("com.squareup:kotlinpoet:1.10.2")
+    implementation("com.squareup:kotlinpoet:1.12.0")
     implementation("org.ogce:xpp3:1.1.6")
 
     testImplementation(kotlin("test-junit"))

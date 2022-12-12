@@ -13,11 +13,12 @@ import kotlin.math.max
 typealias IconNameTransformer = (iconName: String, group: String) -> String
 
 data class Size(val height: Float, val width: Float) {
-    constructor(size: Float) : this(size, size)
-    constructor(size: Int) : this(size.toFloat())
+
+    constructor(size: Number) : this(size.toFloat(), size.toFloat())
 
     val maxValue
         get() = max(height, width).toInt()
+
 }
 
 object Svg2Compose {
@@ -82,6 +83,7 @@ object Svg2Compose {
 
                                 it to parsedFile
                             }.toList()
+
                             VectorType.DRAWABLE -> dirIcons.toList().map { it to it }
                         }
 
@@ -162,8 +164,8 @@ object Svg2Compose {
     fun parse(
         path: IconPath,
         outputSourceDirectory: File,
-        type: VectorType = VectorType.SVG,
-        packageName: String = "com.exampe",
+        type: VectorType,
+        packageName: String = "com.example",
         groupName: String = "EvaIcons",
         iconNameTransformer: IconNameTransformer = { it, _ -> it },
         size: Size? = null,
@@ -181,6 +183,7 @@ object Svg2Compose {
 
                 parsedFile
             }
+
             VectorType.DRAWABLE -> {
                 iconFile
             }
